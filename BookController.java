@@ -16,12 +16,12 @@ public class BookController {
 		myModel.addBook();
 	}
 	
-	public void readBook() {
-		myModel.setToRead();
+	public void readBook(Book book) {
+		myModel.setToRead(book);
 	}
 	
-	public void rateBook() {
-		myModel.rate();
+	public void rateBook(Book book, int rating) {
+		myModel.rate(book, rating);
 	}
 	
 	public void getBooksFromLibrary() {
