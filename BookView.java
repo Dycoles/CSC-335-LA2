@@ -23,19 +23,40 @@ public class BookView {
 		// prompt the user for various commands to interact with the library
 		while (!input.equals("exit")) {
 			System.out.println("Please enter the command you wish to execute:");
-			System.out.println("search -> Search for a book by title, author, or rating.");
+			System.out.println("search -> Search for a book by 'title', 'author', or 'rating'.");
 			System.out.println("addBook -> Add a book to the collection.");
 			System.out.println("setToRead -> Set a book to 'read'.");
 			System.out.println("rate -> Rate a book with a rating between 1 and 5 (inclusive)");
-			System.out.println("getBooks -> Retrieve and display your books, sorted by title, author, and whether or not they have been read.");
+			System.out.println("getBooks -> Retrieve and display your books, sorted by 'title', "
+					+ "'author', and whether or not they have been 'read'.");
 			System.out.println("suggestRead -> Get a suggestion for a book to read.");
 			System.out.println("addBooks -> Add multiple books to the library at once.");
 
 			System.out.println("Please enter 'exit' if you wish to close the program");
 			input = keyboard.next();
 			
+			// Do actions based on inputs
 			switch(input) {
 			case "search":
+				System.out.println("Please enter how you wish to search for a book: -> 'title'; 'author'; "
+						+ "'rating'");
+				String searchInput = keyboard.next();
+				
+				switch(searchInput) {
+				case "title":
+					controller.searchLibrary();
+					break;
+				case "author":
+					controller.searchLibrary();
+					break;
+				case "rating":
+					controller.searchLibrary();
+					break;
+				case "exit":
+					break;
+				default:
+					System.out.println("Please enter a valid command");
+				}
 				break;
 			case "addBook":
 				break;
