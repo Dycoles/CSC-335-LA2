@@ -59,6 +59,12 @@ public class BookView {
 				}
 				break;
 			case "addBook":
+				// modifying addBook to add a single book.
+				System.out.println("Please enter the book's title: ");
+				String newTitle= keyboard.next();
+				String newAuthor=keyboard.next();
+				Book newBook= new Book(newTitle, newAuthor);
+				controller.addBookToLibrary(newBook);
 				break;
 			case "setToRead":
 				break;
@@ -67,9 +73,18 @@ public class BookView {
 			case "getBooks":
 				break;
 			case "suggestRead":
+				String[] bookInfo= controller.suggestBook();
+				System.out.println("We have a book suggestion for you ! It is: "+bookInfo[0]+" by "
+						+ bookInfo[1]);
+			
 				break;
 			case "addBooks":
+				// modifying addBooks to give a file name.
+				System.out.println("Please enter the name of a file with books to add. ");
+				String fileName= keyboard.next();
+				controller.addListOfBooks(fileName);
 				break;
+				
 			case "exit":
 				break;
 			default:
