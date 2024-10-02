@@ -9,11 +9,11 @@ public class BookController {
 	}
 	
 	public void searchLibrary() {
-		myModel.search();
+		//myModel.search();
 	}
 	
-	public void addBookToLibrary() {
-		myModel.addBook();
+	public void addBookToLibrary(Book book) {
+		myModel.addBook(book);
 	}
 	
 	public void readBook(Book book) {
@@ -28,11 +28,15 @@ public class BookController {
 		myModel.getBooks();
 	}
 	
-	public void suggestBook() {
-		myModel.suggestRead();
+	public String[] suggestBook() {
+		
+		Book suggestion=myModel.suggestRead();
+		String [] bookInfo= {suggestion.getTitle(), suggestion.getAuthor()};
+		return bookInfo;
 	}
 	
-	public void addListOfBooks() {
-		myModel.addBooks(null);
+	
+	public void addListOfBooks(String fileName) {
+		myModel.addBooks(fileName);
 	}
 }
