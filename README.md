@@ -63,6 +63,25 @@ library.add(book)
 
 /*
 
-function getBooks
-
-function rate
+CLASSES AND THEIR METHODS
+public class MyLibrary
+- 1 main method
+- Calls controller and model, and prompts the user for inputs
+public class BookController
+- BookController constructor
+- searchLibrary method
+- addBookToLibrary method
+- readBook method
+- rateBook method
+- getBooksFromLibrary method
+- suggestBook method
+- addlistOfBooks method
+public class BookModel method
+- BookModel contructor
+- addBooks method
+- search method
+- addBook method
+- setToRead method
+- rate method
+- getBooks method
+- suggestRead method
