@@ -1,10 +1,27 @@
-package bookLibrary;
+/* Authors: Chitrangada Juneja and Dylan Coles
+ * Net IDs: cj21 and colesdylan12
+ * The Model class where we create our initial library using the 
+ * given file name. 
+ * Encapsulation is maintained by not communicating to the view directly
+ * except in cases where we need to access private objects to print. we 
+ * determined it was better to do those operations within model. However, 
+ * in most cases, we send control back to the controller once an operation
+ * has been performed to communicate with the user appropriately. this 
+ * ensures no overlap with the view, thereby making it impossible for someone
+ * to modify any internal data structures. 
+ * @throws FileNotFoundException if the file doesn't exist. we exit in that case.
+ * @pre no Null inputs
+ * 
+ * 
+ */
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -26,6 +43,11 @@ public class BookModel {
 	}
 
 	public void addBooks(String fileName) {
+		/* 
+		 * takes in the file name and tries to read it if it exists
+		 * we use a try-catch block so that the error is dealt with here
+		 * instead of passing it on.
+		 */
 		String curString;
 		// read file line by line
 		Scanner input;
@@ -38,6 +60,14 @@ public class BookModel {
 				// both are upper case so its easier to search when needed
 				String title = bookArray[0].toUpperCase();
 				String author = bookArray[1].toUpperCase();
+				// since the structure of the example txt file has a "title ; author" 
+				// we need this check so that we dont accidentally include it as a book
+				// we skip if true.
+				
+				if (title.toUpperCase().equals("TITLE")&& author.toUpperCase().equals("AUTHOR")){
+					continue;
+				}
+				
 				Book book = new Book(title, author);
 				// add to unread books
 				thisLibraryUnread.add(book);
@@ -46,19 +76,24 @@ public class BookModel {
 			}
 			input.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+			System.out.println("No such file exists ! Please try again !");
 			e.printStackTrace();
+			System.exit(0);
 		}
 	}
 
-	public void search(int searchBy, String search) {
+	public ArrayList<Book>  search(int searchBy, String search) {
 		// searchBy==0 specifies search by title
+		ArrayList <Book> results= new ArrayList<Book>();
+		int found=0;
 		if (searchBy == 0) {
 			for (Entry<Book, Integer> mapElement : thisLibraryRating.entrySet()) {
+				
 				Book key = mapElement.getKey();
 				if (key.getTitle().equals(search)) {
-					System.out.println(key.getTitle() + ";" + key.getAuthor());
-					break;
+					results.add(key);
+					found=1;
+					
 				}
 			}
 		}
@@ -67,8 +102,8 @@ public class BookModel {
 			for (Entry<Book, Integer> mapElement : thisLibraryRating.entrySet()) {
 				Book key = mapElement.getKey();
 				if (key.getAuthor().equals(search)) {
-					System.out.println(key.getTitle() + ";" + key.getAuthor());
-					break;
+					results.add(key);
+					found=1;
 				}
 			}
 		}
@@ -78,11 +113,16 @@ public class BookModel {
 				Book key = mapElement.getKey();
 				int rating = mapElement.getValue();
 				if (rating == Integer.valueOf(search)) {
-					System.out.println(key.getTitle() + ";" + key.getAuthor());
-					break;
+					results.add(key);
+					found=1;
 				}
 			}
 		}
+		// it is possible that results is empty; in that case, controller checks
+		// and if true, it prints the appropriate message. 
+		return results;
+		
+		
 
 	}
 
@@ -91,8 +131,14 @@ public class BookModel {
 		thisLibraryRating.put(book, 0);
 	}
 
-	public void setToRead(Book book) {
-		// add book to read list
+	public int setToRead(Book book) {
+		// first we check if the book is even in the library
+		// if not, we return control to the controller to display 
+		// the right message. 
+		
+		if ( thisLibraryRating.get(book)==null) {
+			return 1;
+		}
 		boolean bookInReadList = false;
 		for (int i = 0; i < thisLibraryRead.size(); i++) {
 			if (thisLibraryRead.get(i) == book) {
@@ -105,65 +151,120 @@ public class BookModel {
 			thisLibraryRead.add(book);
 			thisLibraryUnread.remove(book);
 		}
+		return 0;
 	}
 
-	public void rate(Book book, int rating) {
+	public int rate(Book book, int rating) {
 		// set rating; can be changed multiple times
+		// it is possible they are trying to rate a book 
+		// that doesn't exist in the library. we return control
+		// to the controller to display the right message in that case.
+		if (thisLibraryRating.replace(book, rating)==null) {
+			return 1;
+		}
+		
 		thisLibraryRating.replace(book, rating);
+		return 0;
 	}
 
 	/*
-	 * Overloading for getBooks seems like the best idea
-	 * 
-	 */
+	 * Overloading for getBooks seems like the best idea. We
+	 * have 2 different cases: one where we search through the 
+	 * hashmap thisLibraryRating, which contains ALL books, 
+	 * regardless of their read/ unread status. this is used for 
+	 * sorting through title and author.our second case is one
+	 * where we search through an Arraylist- specifically the ones
+	 * for read and unread. therefore, we have 2 versions of the 
+	 * getBooks function. The parameters needed to be different for the
+	 * overloading, so we just take an arbitrary string to change the
+	 * method signature a bit.
+	 * When it comes to the read/unread sorting, it is possible for 
+	 * none of the books to be read, or unread. Therefore, if the list is 
+	 * empty, we transfer control to the controller to display the appropriate
+	 * message. 
+	 * After getting the sorted titles/authors/unread/read status, we still 
+	 * display the book objects with all their information- with title and author.
+	 * therefore, we get a list of keys, and print the appropriate ones in the 
+	 * right order.  
+	 */ 
 	
-	public void getBooks(int searchBy) {
-		// searchBy==0 specifies search by title
-		if (searchBy == 0) {
-			// create title list
-			ArrayList<String> sortedTitles = new ArrayList<String>();
-			for (Entry<Book, Integer> mapElement : thisLibraryRating.entrySet()) {
-				Book key = mapElement.getKey();
-				sortedTitles.add(key.getTitle());
+	public void getBooks ( int searchBy) {
+		ArrayList<String> sorted = new ArrayList<String>();
+		for (Entry<Book, Integer> mapElement : thisLibraryRating.entrySet()) {
+			Book key = mapElement.getKey();
+			if ( searchBy==0) {
+				sorted.add(key.getTitle());
 			}
-			// sort the title list
-			Collections.sort(sortedTitles);
-			// print out each title in sorted order
-			for (int i = 0; i < sortedTitles.size(); i++) {
-				System.out.println(sortedTitles.get(i));
+			if (searchBy==1) {
+				sorted.add(key.getAuthor());
 			}
+			
 		}
-		// searchBy==1 specifies search by author
-		else if (searchBy == 1) {
-			// create author list
-			ArrayList<String> sortedAuthors = new ArrayList<String>();
-			for (Entry<Book, Integer> mapElement : thisLibraryRating.entrySet()) {
-				Book key = mapElement.getKey();
-				sortedAuthors.add(key.getTitle());
-			}
-			// sort the author list
-			Collections.sort(sortedAuthors);
-			// print out each author in sorted order
-			for (int i = 0; i < sortedAuthors.size(); i++) {
-				System.out.println(sortedAuthors.get(i));
-			}
-		}
-		// searchBy==2 specifies search by read
-		else if (searchBy == 2) {
-			// print out all the read titles
-			for (int i = 0; i < thisLibraryRead.size(); i++) {
-				System.out.println(thisLibraryRead.get(i).toString());
-			}
-		}
-		// searchBy==3 specifies search by unread
-		else {
-			for (int i = 0; i < thisLibraryUnread.size(); i++) {
-				System.out.println(thisLibraryUnread.get(i).toString());
+		// sort the title list
+		Collections.sort(sorted);
+		// print out each title in sorted order
+		List<Book> keys= new ArrayList(thisLibraryRating.keySet());
+		for (int i=0; i<sorted.size();i++) {
+			for ( int j=0; j<keys.size(); j++) {
+				
+				if (searchBy==0) {
+					if ( (sorted.get(i)).equals(keys.get(j).getTitle()) ) {
+						System.out.println(keys.get(j).toString());
+						keys.remove(j);
+						break;
+					}
+				}
+				if ( searchBy==1) {
+					if ( (sorted.get(i)).equals(keys.get(j).getAuthor()) ) {
+						System.out.println(keys.get(j).toString());
+						keys.remove(j);
+						break;
+					}
+				}
 			}
 		}
 	}
+	
+	public int getBooks(int searchBy, String searchMode) {
+		/* 2nd version of getBooks
+		 */
+		ArrayList <Book> ListMode;
+		if (searchBy==2) {
+			ListMode= thisLibraryRead;
+			
+		}
+		else {
+			ListMode= thisLibraryUnread;
+		}
+		ArrayList<String> sorted = new ArrayList<String>();
+		
+		
+		for (int i=0; i<ListMode.size(); i++) {
+			sorted.add(ListMode.get(i).getTitle());
+		} 
+		Collections.sort(sorted);
+		if (sorted.isEmpty()) {
+			return 1;
+		}
+		List<Book> keys= new ArrayList(thisLibraryRating.keySet());
+		// print out all the read titles
+		for (int i = 0; i < sorted.size(); i++) {
+			for ( int j=0; j<keys.size(); j++) {
+				if ( (sorted.get(i)).equals(keys.get(j).getTitle()) ) {
+					System.out.println(keys.get(j).toString());
+					keys.remove(j);
+					break;
+				}
+			}
+		}
+		return 0;
+	}
+	
 
 	public Book suggestRead() {
+		/*
+		 * simply shuffling the unread list and returning the one at index 0
+		 */
 		Collections.shuffle(thisLibraryUnread);
 		return thisLibraryUnread.get(0);
 	}
